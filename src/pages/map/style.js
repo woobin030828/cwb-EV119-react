@@ -40,11 +40,12 @@ export const LocationInfo = styled.div`
 `;
 
 export const LocationDot = styled.div`
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  background-color: #00C853;
-  box-shadow: 0 0 0 3px rgba(0, 200, 83, 0.2);
+  background-color: #2196F3;
+  box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.3);
+  border: 2px solid #FFFFFF;
 `;
 
 export const HeaderControls = styled.div`
