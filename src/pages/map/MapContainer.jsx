@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Map, MapMarker, useKakaoLoader } from 'react-kakao-maps-sdk';
 import { useNavigate } from 'react-router-dom';
 import PatientAlertButton from '../../components/patientAlert/PatientAlertButton';
 import UserHeader from '../../components/header/UserHeader';
@@ -8,6 +9,92 @@ const MapContainer = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('distance');
+  const [location, setLocation] = useState(null);   
+  const [map, setMap] = useState(null);
+
+  const [center, setCenter] = useState({
+    lat: 37.5665,   
+    lng: 126.9780,
+  });
+
+  const [loading, error] = useKakaoLoader({
+    appkey: process.env.REACT_APP_KAKAO_KEY, 
+    libraries: ['services'], 
+  });
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      console.log('geolocation 지원 안 함');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCenter({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        });
+      },
+      (err) => {
+        console.log('위치 받기 실패', err);
+        // 실패하면 기본 서울 좌표 유지
+      }
+    );
+  }, []);
+
+
+  const kakaoMap = () => {
+    if (!location) return;
+    if (!window.kakao) {
+      console.log('kakao 객체가 아직 없음');
+      return;
+    }
+
+    const container = document.getElementById('map');
+    if (!container) return;
+
+    const { kakao } = window;
+
+    const options = {
+      center: new kakao.maps.LatLng(location.latitude, location.longitude),
+      level: 3,
+    };
+
+    const createdMap = new kakao.maps.Map(container, options);
+    setMap(createdMap);
+  };
+
+  useEffect(() => {
+    kakaoMap();
+    console.log('현재 위치:', location);
+  }, [location]);
+
+
+  const CurrentLocationMarker = ({ map, location }) => {
+    useEffect(() => {
+      if (!map || !location || !window.kakao) return;
+
+      const { kakao } = window;
+
+      const position = new kakao.maps.LatLng(
+        location.latitude,
+        location.longitude
+      );
+
+      const marker = new kakao.maps.Marker({
+        position,
+      });
+
+      marker.setMap(map);
+
+      // cleanup
+      return () => {
+        marker.setMap(null);
+      };
+    }, [map, location]);
+
+    return null; 
+  };
 
   const emergencyRooms = [
     {
@@ -19,7 +106,7 @@ const MapContainer = () => {
       time: '도보 약 10분',
       status: 'crowded',
       waiting: 12,
-      specialties: ['뇌·심혈관 전문', '중증 응급 수용 가능']
+      specialties: ['뇌·심혈관 전문', '중증 응급 수용 가능'],
     },
     {
       id: 2,
@@ -29,7 +116,7 @@ const MapContainer = () => {
       time: '차량 5분',
       status: 'available',
       waiting: 3,
-      specialties: ['소아 응급 가능', '구급차 우선']
+      specialties: ['소아 응급 가능', '구급차 우선'],
     },
     {
       id: 3,
@@ -39,8 +126,8 @@ const MapContainer = () => {
       time: '차량 10분',
       status: 'full',
       waiting: 0,
-      specialties: ['중증외상센터', 'ICU 만실']
-    }
+      specialties: ['중증외상센터', 'ICU 만실'],
+    },
   ];
 
   const getStatusColor = (status) => {
@@ -76,17 +163,17 @@ const MapContainer = () => {
   };
 
   const handleRelocate = () => {
+    // 나중에 위치 재탐색 로직 다시 호출하도록 만들면 됨
     console.log('위치 재탐색');
   };
 
   const handleNearestRoute = () => {
-    // 가장 가까운 응급실 찾기
     const nearestRoom = emergencyRooms.sort((a, b) => {
       const distanceA = parseFloat(a.distance);
       const distanceB = parseFloat(b.distance);
       return distanceA - distanceB;
     })[0];
-    
+
     if (nearestRoom) {
       navigate(`/main/route/${nearestRoom.id}`);
     }
@@ -138,9 +225,17 @@ const MapContainer = () => {
       <S.MainContent>
         <S.MapArea>
           <S.MapPlaceholder>
-            <S.MapInstruction>
-              드래그 지도를 움직여 다른 구역의 응급실을 탐색할 수 있습니다.
-            </S.MapInstruction>
+            {loading && <div>지도를 불러오는 중입니다...</div>}
+            {error && <div>지도를 불러오는데 실패했습니다.</div>}
+            {!loading && !error && (
+              <Map
+                center={center}
+                style={{ width: '100%', height: '100%' }}
+                level={3}
+              >
+                <MapMarker position={center} />
+              </Map>
+            )}
           </S.MapPlaceholder>
         </S.MapArea>
 
@@ -148,7 +243,10 @@ const MapContainer = () => {
           <S.PanelHeader>
             <S.PanelTitle>주변 응급실</S.PanelTitle>
             <S.FilterInfo>반경 약 5km 내 응급의료기관 기준</S.FilterInfo>
-            <S.SortSelect value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+            <S.SortSelect
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
               <option value="distance">정렬 기준 거리순</option>
               <option value="status">정렬 기준 상태순</option>
             </S.SortSelect>
@@ -171,7 +269,7 @@ const MapContainer = () => {
 
           <S.EmergencyRoomList>
             {emergencyRooms.map((room) => (
-              <S.EmergencyRoomCard 
+              <S.EmergencyRoomCard
                 key={room.id}
                 onClick={() => navigate(`/main/emergency-room/${room.id}`)}
               >
@@ -212,4 +310,3 @@ const MapContainer = () => {
 };
 
 export default MapContainer;
-

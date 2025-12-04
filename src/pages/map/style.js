@@ -170,7 +170,7 @@ export const MapPlaceholder = styled.div`
   background: #E0E0E0;
 `;
 
-export const MapInstruction = styled.p`
+export const MapInstruction = styled.div`
   color: #666666;
   font-size: 16px;
   text-align: center;
