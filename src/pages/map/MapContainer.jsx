@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Map, MapMarker, useKakaoLoader } from 'react-kakao-maps-sdk';
 import { useNavigate } from 'react-router-dom';
 import PatientAlertButton from '../../components/patientAlert/PatientAlertButton';
 import UserHeader from '../../components/header/UserHeader';
@@ -11,38 +12,33 @@ const MapContainer = () => {
   const [location, setLocation] = useState(null);   
   const [map, setMap] = useState(null);
 
+  const [center, setCenter] = useState({
+    lat: 37.5665,   
+    lng: 126.9780,
+  });
+
+  const [loading, error] = useKakaoLoader({
+    appkey: process.env.REACT_APP_KAKAO_KEY, 
+    libraries: ['services'], 
+  });
 
   useEffect(() => {
     if (!navigator.geolocation) {
       console.log('geolocation 지원 안 함');
-      setLocation({
-        latitude: 33.450701,
-        longitude: 126.570667,
-      });
       return;
     }
 
-    const options = {
-      enableHighAccuracy: true,
-      timeout: 5000,
-      maximumAge: 0,
-    };
-
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocation({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
+      (pos) => {
+        setCenter({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
         });
       },
-      (error) => {
-        console.log('위치 받기 실패', error);
-        setLocation({
-          latitude: 33.450701,
-          longitude: 126.570667,
-        });
-      },
-      options
+      (err) => {
+        console.log('위치 받기 실패', err);
+        // 실패하면 기본 서울 좌표 유지
+      }
     );
   }, []);
 
@@ -229,11 +225,17 @@ const MapContainer = () => {
       <S.MainContent>
         <S.MapArea>
           <S.MapPlaceholder>
-            <S.MapInstruction>
-              <div id="map" style={{ width: '100%', height: '100%' }}>
-                <CurrentLocationMarker map={map} location={location} />
-              </div>
-            </S.MapInstruction>
+            {loading && <div>지도를 불러오는 중입니다...</div>}
+            {error && <div>지도를 불러오는데 실패했습니다.</div>}
+            {!loading && !error && (
+              <Map
+                center={center}
+                style={{ width: '100%', height: '100%' }}
+                level={3}
+              >
+                <MapMarker position={center} />
+              </Map>
+            )}
           </S.MapPlaceholder>
         </S.MapArea>
 
