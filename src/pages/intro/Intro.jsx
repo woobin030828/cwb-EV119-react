@@ -251,6 +251,7 @@ const Intro = () => {
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
+    setIsLoading(false)
     setSearchTerm(value);
     searchEmergencyProcedures(value);
   };
@@ -415,23 +416,28 @@ const Intro = () => {
           {isDisplay && (
             <>
               <S.SearchResults>
-                  <S.ResultCard $urgency={firstAidResult?.urgency}>
-                    <S.ResultHeader>
-                      <S.ResultSymptom>{firstAidResult?.firstAidKeywords[0]}</S.ResultSymptom>
-                      <S.UrgencyBadge $urgency={firstAidResult?.urgency}>
-                        {firstAidResult?.urgency === 'CRITICAL' ? '긴급' : 
-                         firstAidResult?.urgency === 'HIGH' ? '높음' : '보통'}
-                      </S.UrgencyBadge>
-                    </S.ResultHeader>
-                    <S.ProceduresList>
-                      {firstAidResult?.firstAidProcedures?.map((procedure, idx) => (
-                        <S.ProcedureItem key={idx}>
-                          <S.ProcedureNumber>{idx + 1}</S.ProcedureNumber>
-                          <S.ProcedureText>{procedure}</S.ProcedureText>
-                        </S.ProcedureItem>
-                      ))}
-                    </S.ProceduresList>
-                  </S.ResultCard>
+                <S.ResultCard $urgency={firstAidResult?.urgency}>
+                  <S.ResultHeader>
+                    <S.ResultSymptom>
+                      {firstAidResult?.firstAidKeywords?.[0]}
+                    </S.ResultSymptom>
+                    <S.UrgencyBadge $urgency={firstAidResult?.urgency}>
+                      {firstAidResult?.urgency === 'CRITICAL'
+                        ? '긴급'
+                        : firstAidResult?.urgency === 'HIGH'
+                        ? '높음'
+                        : '보통'}
+                    </S.UrgencyBadge>
+                  </S.ResultHeader>
+                  <S.ProceduresList>
+                    {firstAidResult?.firstAidProcedures?.map((procedure, idx) => (
+                      <S.ProcedureItem key={idx}>
+                        <S.ProcedureNumber>{idx + 1}</S.ProcedureNumber>
+                        <S.ProcedureText>{procedure}</S.ProcedureText>
+                      </S.ProcedureItem>
+                    ))}
+                  </S.ProceduresList>
+                </S.ResultCard>
               </S.SearchResults>
               <S.EmergencyRouteButton onClick={handleNearestRoute}>
                 <S.RouteIcon>🧭</S.RouteIcon>

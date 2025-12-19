@@ -272,8 +272,8 @@ export const ResultCard = styled.div`
   background-color: #FFFFFF;
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-left: 3px solid ${props => {
-    if (props.$urgency === 'critical') return '#CD0B16';
-    if (props.$urgency === 'high') return '#FF9800';
+    if (props.$urgency ===  'CRITICAL') return '#CD0B16';
+    if (props.$urgency === 'HIGH') return '#FF9800';
     return '#9E9E9E';
   }};
   border-radius: 8px;
@@ -309,13 +309,13 @@ export const UrgencyBadge = styled.span`
   font-weight: 500;
   white-space: nowrap;
   background-color: ${props => {
-    if (props.$urgency === 'critical') return '#FFEBEE';
-    if (props.$urgency === 'high') return '#FFF3E0';
+    if (props.$urgency === 'CRITICAL') return '#FFEBEE';
+    if (props.$urgency === 'HIGH') return '#FFF3E0';
     return '#F5F5F5';
   }};
   color: ${props => {
-    if (props.$urgency === 'critical') return '#CD0B16';
-    if (props.$urgency === 'high') return '#FF9800';
+    if (props.$urgency === 'CRITICAL') return '#CD0B16';
+    if (props.$urgency === 'HIGH') return '#FF9800';
     return '#666666';
   }};
 `;
