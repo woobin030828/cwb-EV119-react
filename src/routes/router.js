@@ -11,6 +11,8 @@ import Profile from "../pages/mypage/Profile";
 import HealthInfo from "../pages/mypage/HealthInfo";
 import VisitHistory from "../pages/mypage/VisitHistory";
 import SocialRedirect from "../pages/auth/SocialRedirect";
+import FindPassword from "../pages/auth/FindPassword";
+import ResetPassword from "../pages/auth/ResetPassword";
 
 const router = createBrowserRouter([
   {
@@ -28,6 +30,14 @@ const router = createBrowserRouter([
   {
     path: "/auth/signup",
     element: <SignUp />
+  },
+  {
+    path: "/auth/findPassword",
+    element: <FindPassword />
+  },
+  {
+    path: "/auth/resetPassword",
+    element: <ResetPassword />
   },
   {
     path: "/auth/oauth2/redirect",
